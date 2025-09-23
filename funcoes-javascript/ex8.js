@@ -8,8 +8,8 @@ Instruções
     c) O neurônio deve fazer classificação binária, ou 1 ou 0; 
 */
 
-let X = [1, 1]
-let w = [0.1, 0.2]
+let inputs = [1, 1]
+let weights = [0.1, 0.2]
 let bias = 2
 
 const potencial = (X, w, b) => {
@@ -32,5 +32,5 @@ const classificaNeuronio = (X, w, b, ativacao) => {
 }
 
 console.log(
-    classificaNeuronio(X, w, bias, ativacao)
+    classificaNeuronio(inputs, weights, bias, ativacao)
 )
