@@ -8,9 +8,9 @@ Instruções
     c) O neurônio deve fazer classificação binária, ou 1 ou 0; 
 */
 
-let inputs = [1, 1]
+let inputs = [1, 0]
 let weights = [0.1, 0.2]
-let bias = 2
+let bias = 0.3
 
 const potencial = (X, w, b) => {
     let somaPonderada = 0
