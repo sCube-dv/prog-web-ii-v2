@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor de Unidades</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .conversor {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input,
+        select,
+        button {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .resultado {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Conversor de Unidades</h1>
+
+    <div class="conversor">
+        <h2>Temperatura</h2>
+        <input type="number" id="tempValor" placeholder="Valor">
+        <select id="tempDirecao">
+            <option value="celsiusParaFahrenheit">Celsius → Fahrenheit</option>
+            <option value="fahrenheitParaCelsius">Fahrenheit → Celsius</option>
+        </select>
+        <button onclick="converterTemperatura()">Converter</button>
+        <div class="resultado" id="tempResultado"></div>
+    </div>
+
+    <div class="conversor">
+        <h2>Distância</h2>
+        <input type="number" id="distValor" placeholder="Valor">
+        <select id="distDirecao">
+            <option value="metrosParaQuilometros">Metros → Quilômetros</option>
+            <option value="quilometrosParaMetros">Quilômetros → Metros</option>
+        </select>
+        <button onclick="converterDistancia()">Converter</button>
+        <div class="resultado" id="distResultado"></div>
+    </div>
+
+    <div class="conversor">
+        <h2>Moeda</h2>
+        <input type="number" id="moedaValor" placeholder="Valor">
+        <select id="moedaDirecao">
+            <option value="reaisParaDolar">Reais → Dólar</option>
+            <option value="dolarParaReais">Dólar → Reais</option>
+        </select>
+        <input type="number" id="moedaTaxa" placeholder="Taxa (padrão: 5.5)" step="0.01">
+        <button onclick="converterMoeda()">Converter</button>
+        <div class="resultado" id="moedaResultado"></div>
+    </div>
+
+    <script src="conversor.js"></script>
+    <script>
+        function converterTemperatura() {
+            const valor = parseFloat(document.getElementById('tempValor').value);
+            const direcao = document.getElementById('tempDirecao').value;
+
+            try {
+                const resultado = Conversor.converterTemperatura(valor, direcao);
+                document.getElementById('tempResultado').textContent = `Resultado: ${resultado.toFixed(2)}`;
+            } catch (error) {
+                document.getElementById('tempResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function converterDistancia() {
+            const valor = parseFloat(document.getElementById('distValor').value);
+            const direcao = document.getElementById('distDirecao').value;
+
+            try {
+                const resultado = Conversor.converterDistancia(valor, direcao);
+                document.getElementById('distResultado').textContent = `Resultado: ${resultado.toFixed(2)}`;
+            } catch (error) {
+                document.getElementById('distResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function converterMoeda() {
+            const valor = parseFloat(document.getElementById('moedaValor').value);
+            const direcao = document.getElementById('moedaDirecao').value;
+            const taxaInput = document.getElementById('moedaTaxa').value;
+            const taxa = taxaInput ? parseFloat(taxaInput) : 5.5;
+
+            try {
+                const resultado = Conversor.converterMoeda(valor, direcao, taxa);
+                document.getElementById('moedaResultado').textContent = `Resultado: ${resultado.toFixed(2)}`;
+            } catch (error) {
+                document.getElementById('moedaResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+
+</html>
