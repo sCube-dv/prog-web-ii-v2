@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gerenciamento de Produtos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .secao {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input,
+        button,
+        select {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button.vermelho {
+            background-color: #f44336;
+        }
+
+        .resultado {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .acoes {
+            white-space: nowrap;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Sistema de Gerenciamento de Produtos</h1>
+
+    <div class="secao">
+        <h2>Cadastrar Produto</h2>
+        <input type="text" id="cadDescricao" placeholder="Descrição">
+        <input type="number" id="cadPreco" placeholder="Preço" step="0.01" min="0">
+        <input type="number" id="cadEstoque" placeholder="Estoque" min="0">
+        <button onclick="cadastrarProduto()">Cadastrar</button>
+        <div class="resultado" id="cadResultado"></div>
+    </div>
+
+    <div class="secao">
+        <h2>Consultar Produto por ID</h2>
+        <input type="number" id="consultaId" placeholder="ID do produto" min="1">
+        <button onclick="consultarPorId()">Consultar</button>
+        <div class="resultado" id="consultaResultado"></div>
+    </div>
+
+    <div class="secao">
+        <h2>Editar Produto</h2>
+        <input type="number" id="editId" placeholder="ID do produto" min="1">
+        <input type="text" id="editDescricao" placeholder="Nova descrição">
+        <input type="number" id="editPreco" placeholder="Novo preço" step="0.01" min="0">
+        <input type="number" id="editEstoque" placeholder="Novo estoque" min="0">
+        <button onclick="editarProduto()">Editar</button>
+        <div class="resultado" id="editResultado"></div>
+    </div>
+
+    <div class="secao">
+        <h2>Excluir Produto</h2>
+        <input type="number" id="excluirId" placeholder="ID do produto" min="1">
+        <button class="vermelho" onclick="excluirProduto()">Excluir</button>
+        <div class="resultado" id="excluirResultado"></div>
+    </div>
+
+    <div class="secao">
+        <h2>Lista de Produtos</h2>
+        <button onclick="listarProdutos()">Atualizar Lista</button>
+        <button class="vermelho" onclick="limparBanco()">Limpar Banco (Teste)</button>
+        <div id="listaProdutos"></div>
+    </div>
+
+    <script src="banco.js"></script>
+    <script>
+        // Inicializar com alguns produtos de exemplo
+        function inicializarExemplos() {
+            if (Banco.consultar().length === 0) {
+                Banco.cadastrar({ descricao: 'Notebook Dell', preco: 2500.00, estoque: 10 });
+                Banco.cadastrar({ descricao: 'Mouse Logitech', preco: 89.90, estoque: 50 });
+                Banco.cadastrar({ descricao: 'Teclado Mecânico', preco: 199.99, estoque: 25 });
+                listarProdutos();
+            }
+        }
+
+        function cadastrarProduto() {
+            const descricao = document.getElementById('cadDescricao').value;
+            const preco = document.getElementById('cadPreco').value;
+            const estoque = document.getElementById('cadEstoque').value;
+
+            try {
+                const id = Banco.cadastrar({ descricao, preco, estoque });
+                document.getElementById('cadResultado').textContent = `Produto cadastrado com ID: ${id}`;
+                document.getElementById('cadDescricao').value = '';
+                document.getElementById('cadPreco').value = '';
+                document.getElementById('cadEstoque').value = '';
+                listarProdutos();
+            } catch (error) {
+                document.getElementById('cadResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function consultarPorId() {
+            const id = parseInt(document.getElementById('consultaId').value);
+
+            try {
+                const produto = Banco.consultarPorId(id);
+                document.getElementById('consultaResultado').textContent =
+                    `ID: ${produto.id}, Descrição: ${produto.descricao}, Preço: R$ ${produto.preco.toFixed(2)}, Estoque: ${produto.estoque}`;
+            } catch (error) {
+                document.getElementById('consultaResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function editarProduto() {
+            const id = parseInt(document.getElementById('editId').value);
+            const descricao = document.getElementById('editDescricao').value;
+            const preco = document.getElementById('editPreco').value;
+            const estoque = document.getElementById('editEstoque').value;
+
+            const novosDados = {};
+            if (descricao) novosDados.descricao = descricao;
+            if (preco) novosDados.preco = preco;
+            if (estoque) novosDados.estoque = estoque;
+
+            try {
+                Banco.editar(id, novosDados);
+                document.getElementById('editResultado').textContent = 'Produto editado com sucesso!';
+                document.getElementById('editId').value = '';
+                document.getElementById('editDescricao').value = '';
+                document.getElementById('editPreco').value = '';
+                document.getElementById('editEstoque').value = '';
+                listarProdutos();
+            } catch (error) {
+                document.getElementById('editResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function excluirProduto() {
+            const id = parseInt(document.getElementById('excluirId').value);
+
+            try {
+                Banco.excluir(id);
+                document.getElementById('excluirResultado').textContent = 'Produto excluído com sucesso!';
+                document.getElementById('excluirId').value = '';
+                listarProdutos();
+            } catch (error) {
+                document.getElementById('excluirResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function listarProdutos() {
+            const produtos = Banco.consultar();
+            const listaHtml = document.getElementById('listaProdutos');
+
+            if (produtos.length === 0) {
+                listaHtml.innerHTML = '<p>Nenhum produto cadastrado.</p>';
+                return;
+            }
+
+            let tabela = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Descrição</th>
+                            <th>Preço (R$)</th>
+                            <th>Estoque</th>
+                            <th class="acoes">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            produtos.forEach(produto => {
+                tabela += `
+                    <tr>
+                        <td>${produto.id}</td>
+                        <td>${produto.descricao}</td>
+                        <td>${produto.preco.toFixed(2)}</td>
+                        <td>${produto.estoque}</td>
+                        <td class="acoes">
+                            <button onclick="preencherEdicao(${produto.id})">Editar</button>
+                            <button class="vermelho" onclick="excluirDireto(${produto.id})">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tabela += '</tbody></table>';
+            listaHtml.innerHTML = tabela;
+        }
+
+        function preencherEdicao(id) {
+            try {
+                const produto = Banco.consultarPorId(id);
+                document.getElementById('editId').value = produto.id;
+                document.getElementById('editDescricao').value = produto.descricao;
+                document.getElementById('editPreco').value = produto.preco;
+                document.getElementById('editEstoque').value = produto.estoque;
+            } catch (error) {
+                alert(`Erro: ${error.message}`);
+            }
+        }
+
+        function excluirDireto(id) {
+            if (confirm(`Tem certeza que deseja excluir o produto com ID ${id}?`)) {
+                try {
+                    Banco.excluir(id);
+                    listarProdutos();
+                } catch (error) {
+                    alert(`Erro: ${error.message}`);
+                }
+            }
+        }
+
+        function limparBanco() {
+            if (confirm('Tem certeza que deseja limpar todo o banco de dados? Esta ação não pode ser desfeita.')) {
+                Banco.limpar();
+                listarProdutos();
+                alert('Banco de dados limpo!');
+            }
+        }
+
+        // Inicializar a aplicação
+        inicializarExemplos();
+    </script>
+</body>
+
+</html>
