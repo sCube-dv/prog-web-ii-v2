@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .secao {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input,
+        button {
+            padding: 8px;
+            margin: 5px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .resultado {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .info {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Sistema de Autenticação</h1>
+
+    <div class="secao">
+        <h2>Registrar Novo Usuário</h2>
+        <input type="text" id="regUsername" placeholder="Usuário">
+        <input type="password" id="regPassword" placeholder="Senha">
+        <button onclick="registrar()">Registrar</button>
+        <div class="resultado" id="regResultado"></div>
+    </div>
+
+    <div class="secao">
+        <h2>Login</h2>
+        <input type="text" id="loginUsername" placeholder="Usuário">
+        <input type="password" id="loginPassword" placeholder="Senha">
+        <button onclick="login()">Login</button>
+        <div class="resultado" id="loginResultado"></div>
+    </div>
+
+    <div class="secao">
+        <h2>Logout</h2>
+        <input type="text" id="logoutToken" placeholder="Token">
+        <button onclick="logout()">Logout</button>
+        <div class="resultado" id="logoutResultado"></div>
+    </div>
+
+    <div class="secao">
+        <h2>Verificar Token</h2>
+        <input type="text" id="verificarToken" placeholder="Token">
+        <button onclick="verificarToken()">Verificar</button>
+        <div class="resultado" id="verificarResultado"></div>
+    </div>
+
+    <div class="info">
+        <h3>Informações do Sistema</h3>
+        <p>Usuários registrados: <span id="totalUsuarios">0</span></p>
+        <p>Usuários logados: <span id="usuariosLogados">0</span></p>
+        <div id="listaLogados"></div>
+    </div>
+
+    <script src="autenticador.js"></script>
+    <script>
+        let tokenAtual = null;
+
+        function atualizarInfo() {
+            document.getElementById('totalUsuarios').textContent = Autenticador.getTodosUsuarios().length;
+            document.getElementById('usuariosLogados').textContent = Autenticador.getUsuariosLogados().length;
+
+            const lista = Autenticador.getUsuariosLogados();
+            const listaHtml = lista.map(user =>
+                `<div>${user.username} (token: ${user.token.substring(0, 10)}...)</div>`
+            ).join('');
+            document.getElementById('listaLogados').innerHTML = listaHtml;
+        }
+
+        function registrar() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const id = Autenticador.registrar(username, password);
+                document.getElementById('regResultado').textContent = `Usuário registrado com ID: ${id}`;
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regPassword').value = '';
+                atualizarInfo();
+            } catch (error) {
+                document.getElementById('regResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                tokenAtual = Autenticador.login(username, password);
+                document.getElementById('loginResultado').textContent = `Login bem-sucedido! Token: ${tokenAtual}`;
+                document.getElementById('loginUsername').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('logoutToken').value = tokenAtual;
+                atualizarInfo();
+            } catch (error) {
+                document.getElementById('loginResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function logout() {
+            const token = document.getElementById('logoutToken').value;
+
+            try {
+                Autenticador.logout(token);
+                document.getElementById('logoutResultado').textContent = 'Logout bem-sucedido!';
+                if (token === tokenAtual) {
+                    tokenAtual = null;
+                }
+                document.getElementById('logoutToken').value = '';
+                atualizarInfo();
+            } catch (error) {
+                document.getElementById('logoutResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        function verificarToken() {
+            const token = document.getElementById('verificarToken').value;
+
+            try {
+                const valido = Autenticador.verificarToken(token);
+                document.getElementById('verificarResultado').textContent =
+                    `Token ${valido ? 'válido' : 'inválido'}`;
+            } catch (error) {
+                document.getElementById('verificarResultado').textContent = `Erro: ${error.message}`;
+            }
+        }
+
+        // Inicializar informações
+        atualizarInfo();
+    </script>
+</body>
+
+</html>
